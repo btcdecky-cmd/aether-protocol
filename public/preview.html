@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aether — Discover. Participate. Earn.</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0b0b0f; --surface: #12121a; --border: #2a2a3a;
+      --text: #e8e8f0; --muted: #9a9aab; --accent: #8b7cf6; --accent-dim: #6c5ce7;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--text);
+      font-family: "IBM Plex Sans", system-ui, sans-serif;
+      background: radial-gradient(ellipse at top, #16161f 0%, var(--bg) 55%);
+      line-height: 1.5;
+    }
+    h1, h2, h3 { font-family: "Instrument Serif", Georgia, serif; font-weight: 400; letter-spacing: -0.02em; }
+    a { color: var(--accent); text-decoration: none; }
+    .shell { max-width: 960px; margin: 0 auto; padding: 0 16px 40px; }
+    .nav {
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+      padding: 16px 0; border-bottom: 1px solid var(--border); margin-bottom: 24px;
+    }
+    .nav a {
+      color: var(--muted); padding: 6px 12px; border-radius: 8px; font-size: 14px; font-weight: 500;
+    }
+    .nav a:hover, .nav a.active { color: var(--text); background: var(--surface); }
+    .brand { font-family: "Instrument Serif", Georgia, serif !important; font-size: 22px !important; color: var(--text) !important; margin-right: auto; }
+    .hero { padding: 32px 0 24px; }
+    .hero h1 { font-size: clamp(2rem, 5vw, 3rem); margin: 0 0 12px; line-height: 1.15; }
+    .muted { color: var(--muted); font-size: 14px; }
+    .btn {
+      display: inline-flex; padding: 10px 16px; border-radius: 8px; border: none;
+      background: var(--accent-dim); color: #fff; font-weight: 600; font-size: 14px; cursor: pointer;
+    }
+    .btn.ghost { background: transparent; border: 1px solid var(--border); color: var(--text); }
+    .grid { display: grid; gap: 12px; }
+    @media (min-width: 640px) { .grid.cols-2 { grid-template-columns: 1fr 1fr; } }
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 16px 18px; margin-bottom: 12px;
+    }
+    .card h3 { margin: 0 0 6px; font-size: 20px; }
+    .badge {
+      display: inline-block; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em;
+      padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); color: #a8a29e; margin-right: 6px;
+    }
+    .badge.override { border-color: #c4b5fd; color: #c4b5fd; }
+    .badge.contract { border-color: #86efac; color: #86efac; }
+    .badge.remnant { border-color: #94a3b8; color: #94a3b8; }
+    .actions { display: flex; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
+    .note {
+      margin-top: 32px; padding: 14px 16px; border-radius: 10px;
+      border: 1px dashed var(--border); color: var(--muted); font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav class="nav">
+      <a href="#" class="brand">Aether</a>
+      <a href="#" class="active">Discover</a>
+      <a href="#">Journey</a>
+      <a href="#">Wallet</a>
+      <a href="#">Advertise</a>
+      <a href="#">Lend</a>
+      <a href="#">Bags</a>
+    </nav>
+
+    <section class="hero">
+      <h1>Discover. Participate. Earn.</h1>
+      <p class="muted" style="max-width: 520px">
+        On-chain Solana adoption and advertising. Complete real actions — not empty clicks —
+        and get paid from campaign escrow. Lending unlocks after your first payout.
+      </p>
+      <div class="actions">
+        <button class="btn">Browse campaigns</button>
+        <button class="btn ghost">Start journey</button>
+      </div>
+    </section>
+
+    <h2 style="font-size: 22px; margin-bottom: 12px">Featured</h2>
+    <div class="grid cols-2">
+      <div class="card">
+        <span class="badge override">override</span>
+        <span class="badge">activation</span>
+        <h3>Stake your first SOL on Helix</h3>
+        <p class="muted">Cut your staking setup from 3 tools to 1 click — earn on day one.</p>
+        <p class="muted" style="margin-top: 8px">0.050 SOL · 50/1000 completions</p>
+      </div>
+      <div class="card">
+        <span class="badge contract">contract</span>
+        <span class="badge">liquidity</span>
+        <h3>Provide liquidity on Quarry</h3>
+        <p class="muted">Still earning 0% on idle USDC? Route it into Quarry in under 5 minutes.</p>
+        <p class="muted" style="margin-top: 8px">0.080 SOL · 0/500 completions</p>
+      </div>
+      <div class="card">
+        <span class="badge contract">contract</span>
+        <span class="badge">education</span>
+        <h3>Oracle 101 with Signal</h3>
+        <p class="muted">47% of failed liquidations start with stale prices — learn how Signal keeps feeds live.</p>
+        <p class="muted" style="margin-top: 8px">0.025 SOL · 40/800 completions</p>
+      </div>
+      <div class="card">
+        <span class="badge remnant">remnant</span>
+        <span class="badge">discovery</span>
+        <h3>Explore Northwind markets</h3>
+        <p class="muted">Browse live markets — no deposit required to learn the UI.</p>
+        <p class="muted" style="margin-top: 8px">0.005 SOL · 0/2000 completions</p>
+      </div>
+    </div>
+
+    <div class="note">
+      <strong style="color: var(--text)">Static design preview</strong> of the Aether home / discover look.
+      Full React app: clone the repo → <code>npm install && npm run dev</code>, or deploy on Vercel for a live URL.
+    </div>
+  </div>
+</body>
+</html>
