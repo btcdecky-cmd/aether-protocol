@@ -3,7 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
-  "description": "Aether — on-chain Solana adoption, advertising, and lending protocol. Discover projects, complete real actions, earn rewards. Integrated with Bags.fm.",
+  "description": "Aether — on-chain Solana adoption, advertising, and lending. Discover projects, complete real actions, earn rewards. Integrated with Bags.fm.",
   "scripts": {
     "dev": "vite dev --port 3000",
     "build": "vite build",
@@ -16,16 +16,17 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.98.0",
-    "@tanstack/react-router": "^1.114.0",
-    "@tanstack/react-start": "^1.114.0",
+    "@supabase/supabase-js": "^2.49.0",
     "drizzle-orm": "^0.39.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-router-dom": "^7.1.0",
     "zod": "^3.24.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
     "drizzle-kit": "^0.30.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
