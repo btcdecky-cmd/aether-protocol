@@ -2,43 +2,65 @@
 
 **On-chain Solana adoption, advertising, and lending.**
 
-Discover projects → complete real actions → earn rewards from escrow → unlock lending.
-
-Live product loop: **Discover → Participate → Earn**. Lending markets stay locked until a campaign has paid you (journey step 6).
+Discover → Participate → Earn. Lending unlocks after your first campaign payout.
 
 Repository: [github.com/btcdecky-cmd/aether-protocol](https://github.com/btcdecky-cmd/aether-protocol)
 
-**Website (after deploy):** Import this repo on [Vercel](https://vercel.com/new) → production URL will look like `https://aether-protocol.vercel.app`. Update this line with your live URL after the first deploy.
+**Static UI preview:** [htmlpreview](https://htmlpreview.github.io/?https://github.com/btcdecky-cmd/aether-protocol/blob/main/public/preview.html)
 
 ---
 
-## Quick start (Supabase + Bags placeholders)
+## Quick start
 
 ```bash
 git clone https://github.com/btcdecky-cmd/aether-protocol.git
 cd aether-protocol
 cp .env.example .env
-# Edit .env:
-#   DATABASE_URL / SUPABASE_*  → https://supabase.com/dashboard
-#   BAGS_API_KEY               → https://dev.bags.fm (or leave placeholder)
+# Supabase → supabase.com/dashboard
+# Bags    → dev.bags.fm
+# Helius  → dashboard.helius.dev
 npm install
-npm run dev          # http://localhost:3000
+npm run dev
+npm run helius:ping   # optional
 ```
-
-Demo mode works with placeholder keys (in-memory campaigns, no real auth/DB).
 
 ---
 
-## What’s in this repo
+## Integrations
 
-| Area | Description |
-|------|-------------|
-| **User app** | Vite + React routes: Home, Discover, Campaign, Journey, Wallet, Advertise, Lend, Bags |
-| **Campaign marketplace** | Status lifecycle + zones + priority |
-| **Adoption journey** | 7-step path |
-| **Advertise** | Draft → review → **Fund & activate** |
-| **Bags.fm API** | Integrated client (`src/lib/bags`) |
-| **Solana programs** | Campaign escrow + lending sketches |
+### Helius ([helius-labs/helius-sdk](https://github.com/helius-labs/helius-sdk))
+
+**Helius is integrated** in this repository.
+
+| Item | Path / detail |
+|------|----------------|
+| Client | `src/lib/helius/client.ts` |
+| Task proof | `src/lib/helius/verify-task.ts` |
+| UI | `/helius` route |
+| Package | `helius-sdk` in `package.json` |
+| Env | `HELIUS_API_KEY`, `VITE_HELIUS_API_KEY`, `SOLANA_RPC_URL` |
+| Docs | [helius.dev/docs](https://www.helius.dev/docs) |
+| Dashboard | [dashboard.helius.dev](https://dashboard.helius.dev) |
+
+Used for: RPC balance/slot, DAS `getAssetsByOwner`, transaction history, signature verification before escrow rewards, priority fee estimates.
+
+```ts
+import { createHelius } from "helius-sdk";
+const helius = createHelius({ apiKey: process.env.HELIUS_API_KEY!, network: "mainnet" });
+```
+
+Or use the built-in wrapper (works without the SDK installed):
+
+```ts
+import { getHeliusClient } from "./src/lib/helius";
+const client = getHeliusClient();
+await client.getAssetsByOwner(wallet);
+await client.verifySignatureSuccess(sig);
+```
+
+### Bags.fm
+
+Client: `src/lib/bags/client.ts` · Env: `BAGS_API_KEY` · [docs.bags.fm](https://docs.bags.fm)
 
 ---
 
@@ -48,32 +70,13 @@ Demo mode works with placeholder keys (in-memory campaigns, no real auth/DB).
 **Zones:** `discover | journey | project | lend_teaser`  
 **Priority:** `override > contract > remnant`
 
----
-
-## Bags.fm API integration
-
-**Bags.fm is integrated** in this repository.
-
-| Item | Detail |
-|------|--------|
-| Client | `src/lib/bags/client.ts` |
-| Docs | [docs.bags.fm](https://docs.bags.fm) |
-| Auth | `x-api-key` from [dev.bags.fm](https://dev.bags.fm) |
-| Env | `BAGS_API_KEY`, `BAGS_API_BASE` |
-
-```bash
-curl https://public-api-v2.bags.fm/ping
-export BAGS_API_KEY=your_key && npm run bags:ping
-```
+Advertise flow: draft → review card → **Fund & activate**.
 
 ---
 
 ## Deploy (Vercel)
 
-1. Open [vercel.com/new](https://vercel.com/new) → Import **btcdecky-cmd/aether-protocol**
-2. Framework: **Vite** · Build: `npm run build` · Output: `dist`
-3. Env vars: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `BAGS_API_KEY`, `DATABASE_URL`
-4. Deploy → paste the production URL into the Website line above
+Import the repo on [vercel.com/new](https://vercel.com/new). Framework: Vite. Set `VITE_HELIUS_API_KEY`, `VITE_SUPABASE_*`, `BAGS_API_KEY`.
 
 ---
 
