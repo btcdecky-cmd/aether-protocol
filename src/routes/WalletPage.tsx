@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { supabaseConfigured } from "../lib/supabase";
 
 function demoPubkey(seed: string) {
@@ -23,6 +24,7 @@ export function WalletPage() {
       <p className="muted">
         Protocol wallet for rewards and advertising escrow. Supabase auth:{" "}
         {supabaseConfigured ? "configured" : "placeholder keys (demo mode)"}.
+        On-chain balance and history via <Link to="/helius">Helius</Link>.
       </p>
 
       <div className="card" style={{ marginTop: 16 }}>
