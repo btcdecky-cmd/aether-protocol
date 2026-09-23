@@ -65,25 +65,43 @@ function apiBase(network: HeliusNetwork): string {
     : "https://api.helius.xyz";
 }
 
+function readEnv(name: string): string | undefined {
+  try {
+    if (typeof process !== "undefined" && process.env?.[name]) {
+      return process.env[name];
+    }
+  } catch {
+    /* browser without process */
+  }
+  try {
+    const meta = import.meta as { env?: Record<string, string | undefined> };
+    if (meta.env?.[name]) return meta.env[name];
+  } catch {
+    /* no import.meta.env */
+  }
+  return undefined;
+}
+
 export class HeliusClient {
   readonly apiKey: string;
   readonly network: HeliusNetwork;
   readonly rpcEndpoint: string;
 
   constructor(opts: HeliusClientOptions = {}) {
-    this.apiKey =
+    const rawKey =
       opts.apiKey ??
-      (typeof process !== "undefined" ? process.env.HELIUS_API_KEY : undefined) ??
-      (typeof process !== "undefined"
-        ? process.env.VITE_HELIUS_API_KEY
-        : undefined) ??
+      readEnv("HELIUS_API_KEY") ??
+      readEnv("VITE_HELIUS_API_KEY") ??
       "";
-    this.network =
+    this.apiKey =
+      rawKey.includes("placeholder") || rawKey.includes("PLACEHOLDER")
+        ? ""
+        : rawKey;
+    const net =
       opts.network ??
-      ((typeof process !== "undefined"
-        ? process.env.HELIUS_NETWORK
-        : undefined) as HeliusNetwork | undefined) ??
+      (readEnv("HELIUS_NETWORK") as HeliusNetwork | undefined) ??
       DEFAULT_NETWORK;
+    this.network = net === "devnet" ? "devnet" : "mainnet";
     this.rpcEndpoint = this.apiKey
       ? rpcUrl(this.apiKey, this.network)
       : "https://api.mainnet-beta.solana.com";
@@ -186,7 +204,12 @@ export class HeliusClient {
       }));
     } catch {
       const sigs = await this.rpc<
-        Array<{ signature: string; slot: number; blockTime?: number | null; err: unknown }>
+        Array<{
+          signature: string;
+          slot: number;
+          blockTime?: number | null;
+          err: unknown;
+        }>
       >("getSignaturesForAddress", [address, { limit }]);
       return sigs.map((s) => ({
         signature: s.signature,
@@ -231,7 +254,10 @@ export class HeliusClient {
     try {
       const result = await this.rpc<{
         value?: Array<{ confirmationStatus?: string; err?: unknown } | null>;
-      }>("getSignatureStatuses", [[signature], { searchTransactionHistory: true }]);
+      }>("getSignatureStatuses", [
+        [signature],
+        { searchTransactionHistory: true },
+      ]);
       const st = result.value?.[0];
       if (!st) return false;
       return !st.err;
@@ -264,17 +290,16 @@ export function getHeliusClient(): HeliusClient {
 export async function createSdkHelius(
   apiKey: string,
   network: HeliusNetwork = "mainnet",
-) {
+): Promise<unknown> {
   try {
-    const mod = await import("helius-sdk");
-    const createHelius = (
-      mod as { createHelius?: (o: { apiKey: string; network?: string }) => unknown }
-    ).createHelius;
-    if (createHelius) {
-      return createHelius({ apiKey, network });
+    // Optional peer: helius-sdk from package.json
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const mod: any = await import(/* @vite-ignore */ "helius-sdk");
+    if (typeof mod?.createHelius === "function") {
+      return mod.createHelius({ apiKey, network });
     }
   } catch {
-    /* package not installed */
+    // package not installed or not available in this runtime
   }
   return new HeliusClient({ apiKey, network });
 }
