@@ -10,3 +10,17 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/** Optional Node process in scripts / SSR */
+declare const process: {
+  env: Record<string, string | undefined>;
+  exit: (code?: number) => never;
+};
+
+/** Optional helius-sdk module (may be absent until npm install) */
+declare module "helius-sdk" {
+  export function createHelius(opts: {
+    apiKey: string;
+    network?: string;
+  }): unknown;
+}
