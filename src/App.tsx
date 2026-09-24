@@ -8,6 +8,7 @@ import { AdvertisePage } from "./routes/AdvertisePage";
 import { LendPage } from "./routes/LendPage";
 import { BagsPage } from "./routes/BagsPage";
 import { HeliusPage } from "./routes/HeliusPage";
+import { InventoryPage } from "./routes/InventoryPage";
 
 export function App() {
   return (
@@ -20,6 +21,7 @@ export function App() {
         <NavLink to="/journey">Journey</NavLink>
         <NavLink to="/wallet">Wallet</NavLink>
         <NavLink to="/advertise">Advertise</NavLink>
+        <NavLink to="/inventory">Inventory</NavLink>
         <NavLink to="/lend">Lend</NavLink>
         <NavLink to="/bags">Bags</NavLink>
         <NavLink to="/helius">Helius</NavLink>
@@ -32,6 +34,7 @@ export function App() {
         <Route path="/journey" element={<JourneyPage />} />
         <Route path="/wallet" element={<WalletPage />} />
         <Route path="/advertise" element={<AdvertisePage />} />
+        <Route path="/inventory" element={<InventoryPage />} />
         <Route path="/lend" element={<LendPage />} />
         <Route path="/bags" element={<BagsPage />} />
         <Route path="/helius" element={<HeliusPage />} />
