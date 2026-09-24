@@ -8,8 +8,8 @@ export function DiscoverPage() {
     <div>
       <h1 style={{ fontSize: 28, marginBottom: 8 }}>Discover</h1>
       <p className="muted" style={{ marginBottom: 20 }}>
-        Active campaigns ranked override → contract → remnant. Rewards from
-        escrow for verified actions.
+        Active campaigns ranked override → contract → remnant, then weight.
+        Rewards from escrow for verified actions.
       </p>
       <div className="grid">
         {campaigns.map((c) => (
@@ -20,7 +20,8 @@ export function DiscoverPage() {
             <p className="muted">{c.hook}</p>
             <p className="muted" style={{ marginTop: 8 }}>
               {(c.rewardPerCompletionLamports / 1e9).toFixed(3)} SOL ·{" "}
-              {c.completionCount}/{c.maxCompletions} completions
+              {c.completionCount}/{c.maxCompletions} completions · w
+              {c.weight ?? 1}
             </p>
           </Link>
         ))}
