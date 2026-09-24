@@ -7,6 +7,7 @@ import {
 import type { Campaign } from "../db/schema/campaigns";
 import { AdvertiseSummaryCard } from "../components/AdvertiseSummaryCard";
 import { upsertCampaign } from "../lib/campaign-store";
+import { deriveEscrowPda, fundCampaignSim } from "../lib/protocol/escrow-client";
 
 export function AdvertisePage() {
   const [title, setTitle] = useState("My protocol launch");
@@ -22,36 +23,37 @@ export function AdvertisePage() {
     [title, budgetSol],
   );
 
-  function onCreateDraft() {
+  function onSubmitReview() {
     const budgetLamports = Math.floor(Number(budgetSol) * 1e9);
-    const reward = Math.floor(budgetLamports / 100);
+    const reward = Math.floor(budgetLamports / 500);
     const c = createDraft({
-      projectId: "proj-custom",
-      slug: title.toLowerCase().replace(/\s+/g, "-").slice(0, 40),
+      projectId: "proj-demo",
+      slug: title.toLowerCase().replace(/[^a-z0-9]+/g, "-").slice(0, 40),
       title,
       hook,
       description: hook,
       objective: "activation",
       priority: "contract",
       zones: ["discover", "project"],
-      category: "custom",
+      category: "protocol",
       budgetLamports,
       rewardPerCompletionLamports: reward,
-      maxCompletions: 100,
+      maxCompletions: 500,
+      weight: 5,
       tasks: [
         {
-          id: "t1",
+          id: "t-visit",
           type: "visit",
-          title: "Visit project",
-          description: "Open the project page from Discover.",
-          rewardLamports: Math.floor(reward / 2),
+          title: "Visit the docs",
+          description: "Open the project landing page",
+          rewardLamports: Math.floor(reward * 0.3),
         },
         {
-          id: "t2",
+          id: "t-onchain",
           type: "onchain",
-          title: "Eligible interaction",
-          description: "Submit a verified on-chain action.",
-          rewardLamports: Math.ceil(reward / 2),
+          title: "Complete an on-chain action",
+          description: "Submit a real tx signature — Helius verifies before payout",
+          rewardLamports: Math.floor(reward * 0.7),
         },
       ],
     });
@@ -62,8 +64,16 @@ export function AdvertisePage() {
   function onActivate() {
     if (!campaign) return;
     setActivating(true);
-    const escrowPda = "Escrow" + campaign.id.slice(0, 28);
+    const escrowPda = deriveEscrowPda(campaign.id);
     const { campaign: active } = activateCampaign(campaign, escrowPda);
+    fundCampaignSim({
+      campaignId: active.id,
+      advertiser: active.advertiserWallet ?? "AdvertiserDemo1111111111111111111111111",
+      authority: "AetherOracle111111111111111111111111111111",
+      budgetLamports: active.budgetLamports,
+      rewardPerCompletionLamports: active.rewardPerCompletionLamports,
+      maxCompletions: active.maxCompletions,
+    });
     upsertCampaign(active);
     setCampaign(active);
     setActivating(false);
@@ -86,89 +96,46 @@ export function AdvertisePage() {
   if (campaign?.status === "active") {
     return (
       <div>
-        <h1 style={{ fontSize: 28 }}>Live</h1>
-        <div className="card">
-          <p>
-            Campaign <strong>{campaign.title}</strong> is active.
-          </p>
-          <p className="muted">Escrow: {campaign.escrowPda}</p>
-          <button
-            className="btn ghost"
-            type="button"
-            onClick={() => setCampaign(null)}
-          >
-            Create another
-          </button>
-        </div>
+        <h1 style={{ fontSize: 28 }}>Campaign live</h1>
+        <p className="muted">{campaign.title} is active. Escrow funded (sim).</p>
+        <p className="muted">Escrow PDA: {campaign.escrowPda}</p>
+        <a className="btn" href={`/campaigns/${campaign.id}`}>
+          View campaign
+        </a>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 style={{ fontSize: 28 }}>Advertise</h1>
+      <h1 style={{ fontSize: 28, marginBottom: 8 }}>Advertise</h1>
       <p className="muted" style={{ marginBottom: 16 }}>
-        Draft → review summary → Fund & activate. Nothing goes live without your
-        confirmation.
+        Draft → review → fund escrow → active. On-chain tasks require Helius proofs.
       </p>
       <div className="card">
-        <label className="muted" style={{ display: "block", marginBottom: 4 }}>
-          Title
-        </label>
+        <label className="muted">Title</label>
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          style={{
-            width: "100%",
-            padding: 10,
-            marginBottom: 12,
-            borderRadius: 8,
-            border: "1px solid var(--border)",
-            background: "#0b0b0f",
-            color: "var(--text)",
-          }}
+          style={{ width: "100%", marginBottom: 12, padding: 10 }}
         />
-        <label className="muted" style={{ display: "block", marginBottom: 4 }}>
-          Hook
-        </label>
-        <textarea
+        <label className="muted">Hook</label>
+        <input
           value={hook}
           onChange={(e) => setHook(e.target.value)}
-          rows={3}
-          style={{
-            width: "100%",
-            padding: 10,
-            marginBottom: 12,
-            borderRadius: 8,
-            border: "1px solid var(--border)",
-            background: "#0b0b0f",
-            color: "var(--text)",
-          }}
+          style={{ width: "100%", marginBottom: 12, padding: 10 }}
         />
-        <label className="muted" style={{ display: "block", marginBottom: 4 }}>
-          Budget (SOL)
-        </label>
+        <label className="muted">Budget (SOL)</label>
         <input
-          type="number"
-          min="0.1"
-          step="0.1"
           value={budgetSol}
           onChange={(e) => setBudgetSol(e.target.value)}
-          style={{
-            width: "100%",
-            padding: 10,
-            marginBottom: 16,
-            borderRadius: 8,
-            border: "1px solid var(--border)",
-            background: "#0b0b0f",
-            color: "var(--text)",
-          }}
+          style={{ width: "100%", marginBottom: 12, padding: 10 }}
         />
         <button
           className="btn"
           type="button"
           disabled={!draftReady}
-          onClick={onCreateDraft}
+          onClick={onSubmitReview}
         >
           Submit for review
         </button>
