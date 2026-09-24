@@ -1,10 +1,5 @@
 /**
- * Advertise flow — Soku-style review gate
- *
- * 1. Draft campaign (no funds moved)
- * 2. Submit → pending_review (summary card)
- * 3. Explicit Fund & Activate → escrow + active
- * 4. Pause / end as needed
+ * Advertise flow — review gate + zone ranking with weight.
  */
 
 import {
@@ -31,6 +26,7 @@ export interface CampaignDraftInput {
   tasks: Campaign["tasks"];
   advertiserWallet?: string;
   endsAt?: string;
+  weight?: number;
 }
 
 export function createDraft(input: CampaignDraftInput): Campaign {
@@ -55,6 +51,7 @@ export function createDraft(input: CampaignDraftInput): Campaign {
     tasks: input.tasks,
     advertiserWallet: input.advertiserWallet,
     endsAt: input.endsAt,
+    weight: input.weight ?? 1,
     createdAt: now,
     updatedAt: now,
   };
@@ -84,7 +81,7 @@ export function buildActivationSummary(c: Campaign): string {
   const zones = c.zones.join(", ");
   return [
     `Campaign: ${c.title}`,
-    `Priority: ${c.priority} · Objective: ${c.objective}`,
+    `Priority: ${c.priority} · Weight: ${c.weight ?? 1} · Objective: ${c.objective}`,
     `Zones: ${zones}`,
     `Budget: ${budgetSol} SOL · Reward/completion: ${rewardSol} SOL`,
     `Max completions: ${c.maxCompletions}`,
@@ -151,6 +148,11 @@ export function campaignsForZone(
     )
     .sort((a, b) => {
       const rank = { override: 0, contract: 1, remnant: 2 } as const;
-      return rank[a.priority] - rank[b.priority];
+      const pr = rank[a.priority] - rank[b.priority];
+      if (pr !== 0) return pr;
+      const wa = a.weight ?? 1;
+      const wb = b.weight ?? 1;
+      if (wb !== wa) return wb - wa;
+      return b.rewardPerCompletionLamports - a.rewardPerCompletionLamports;
     });
 }

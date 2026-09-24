@@ -1,14 +1,10 @@
 /**
  * Aether campaign model
  *
- * Status lifecycle (Soku-style review gate + Revive-inspired priority):
- *   draft → pending_review → active → paused → ended
- *
- * Zones (Revive-inspired inventory surfaces — eligibility, not pixel banners):
- *   discover | journey | project | lend_teaser
- *
- * Priority (Revive campaign types):
- *   override (onboarding) > contract (paid escrow) > remnant (organic)
+ * Status: draft → pending_review → active → paused → ended
+ * Zones: discover | journey | project | lend_teaser
+ * Priority (Revive types): override > contract > remnant
+ * Weight: relative selection within a priority tier
  */
 
 export const CAMPAIGN_STATUSES = [
@@ -61,9 +57,10 @@ export interface CampaignTask {
   type: CampaignTaskType;
   title: string;
   description: string;
-  /** Optional proof target (URL, program id, quiz answer key hash) */
   proofTarget?: string;
   rewardLamports: number;
+  /** Revive banner weight analogue (1–127); default 1 */
+  weight?: number;
 }
 
 export interface Campaign {
@@ -71,35 +68,31 @@ export interface Campaign {
   projectId: string;
   slug: string;
   title: string;
-  /** Hook-style summary (PAS / number-led from marketing-skills) */
   hook: string;
   description: string;
   objective: CampaignObjective;
   status: CampaignStatus;
-  /** Revive-style priority for ranking / fill */
+  /** Revive: override / contract / remnant fill order */
   priority: CampaignPriority;
-  /** Surfaces where this campaign is eligible */
   zones: CampaignZone[];
   category: string;
-  /** Total escrow budget in lamports */
   budgetLamports: number;
-  /** Amount already paid out */
   spentLamports: number;
   rewardPerCompletionLamports: number;
   maxCompletions: number;
   completionCount: number;
   tasks: CampaignTask[];
-  /** Advertiser wallet (base58) */
   advertiserWallet?: string;
-  /** Escrow PDA when funded */
   escrowPda?: string;
+  /** Relative weight among same-priority campaigns in a zone */
+  weight?: number;
+  targetCompletions?: number;
   startsAt?: string;
   endsAt?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-/** Rank order for priority field (lower = higher rank) */
 export const PRIORITY_RANK: Record<CampaignPriority, number> = {
   override: 0,
   contract: 1,
@@ -109,6 +102,9 @@ export const PRIORITY_RANK: Record<CampaignPriority, number> = {
 export function sortCampaignsByPriority(a: Campaign, b: Campaign): number {
   const pr = PRIORITY_RANK[a.priority] - PRIORITY_RANK[b.priority];
   if (pr !== 0) return pr;
+  const wa = a.weight ?? 1;
+  const wb = b.weight ?? 1;
+  if (wb !== wa) return wb - wa;
   return b.rewardPerCompletionLamports - a.rewardPerCompletionLamports;
 }
 
