@@ -1,6 +1,7 @@
 /**
  * Aether escrow client — live protocol layer.
  * Modes: sim (default in-process ledger) | rpc (on-chain instructions)
+ * On-chain task payouts require Helius-enforced proofs only.
  */
 
 import { verifyOnchainTaskProof } from "../helius/verify-task";
@@ -114,6 +115,7 @@ export async function claimCompletion(input: ClaimInput): Promise<ClaimResult> {
     return { ok: false, reason: "already_claimed", mode: protocolMode };
   }
 
+  // Helius-enforced proofs ONLY — no demo bypass
   if (input.taskType === "onchain" || input.taskType === "stake" || input.taskType === "swap") {
     if (!input.proofSignature || input.proofSignature.length < 64) {
       return { ok: false, reason: "proof_signature_required", mode: protocolMode };
@@ -122,12 +124,12 @@ export async function claimCompletion(input: ClaimInput): Promise<ClaimResult> {
       signature: input.proofSignature,
       wallet: input.participant,
     });
-    const heliusConfigured =
-      typeof process !== "undefined" &&
-      process.env?.HELIUS_API_KEY &&
-      !String(process.env.HELIUS_API_KEY).includes("placeholder");
-    if (heliusConfigured && !proof.ok) {
-      return { ok: false, reason: proof.reason ?? "proof_failed", mode: protocolMode };
+    if (!proof.ok) {
+      return {
+        ok: false,
+        reason: proof.reason ?? "helius_proof_failed",
+        mode: protocolMode,
+      };
     }
   }
 
