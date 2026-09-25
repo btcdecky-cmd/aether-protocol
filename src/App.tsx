@@ -16,7 +16,7 @@ export function App() {
     <div className="app-shell">
       <nav className="nav">
         <NavLink to="/" className="brand" end>
-          Aether
+          Swan
         </NavLink>
         <NavLink to="/discover">Discover</NavLink>
         <NavLink to="/journey">Journey</NavLink>
